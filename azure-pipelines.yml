@@ -1,0 +1,49 @@
+  # Starter pipeline
+  # Start with a minimal pipeline that you can customize to build and deploy your code.
+  # Add steps that build, run tests, deploy, and more:
+  # https://aka.ms/yaml
+
+
+stages:
+- stage: Test
+  jobs:
+
+  - job: FastenStaticAnalyzer_UnitTest
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: 'UnitTest'
+    steps:
+    - script: |
+        echo FastenDocSystem pipeline
+        python -m pip install -r requirements.txt
+        python -m unittest
+      # Publish file depends on test_pdf_generation output
+    - publish: $(System.DefaultWorkingDirectory)/testfile.pdf
+      artifact: TestPdf
+
+
+  - job: FastenStaticAnalyzer_Pylint
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: 'Pylint'
+    steps:
+    - script: |
+        echo FastenDocSystem pipeline
+        python -m pip install -r requirements.txt
+        python -m pip install pylint
+        pylint --disable=R,C PdfGenerator.py 
+
+
+  - job: FastenStaticAnalyzer_SystemTest
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: 'SystemTest'
+    steps:
+    - script: |
+        echo FastenDocSystem pipeline
+        python -m pip install -r requirements.txt
+        python PdfGenerator.py --input-path=input --export-pdf-file-path=out/FastenDoc.pdf
+        # '--open-after-generated' cannot use at pipeline
+    - publish: $(System.DefaultWorkingDirectory)/out/FastenDoc.pdf
+      artifact: FastenDocPdf
+
