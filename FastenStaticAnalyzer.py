@@ -1,6 +1,7 @@
 import argparse
 from enum import Enum
 import sys
+import os
 
 #import pycparser
 sys.path.extend(['.', '..', 'pycparser'])
@@ -319,6 +320,9 @@ if __name__ == "__main__":
     # args.source = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
     # "-c " + 
     source = args.source
+
+    if not os.path.exists(source):
+        raise Exception('Source file does not exist!')
 
     #preprocessor_path = r"gcc"
 
