@@ -3,3 +3,5 @@
 *.pyc
 /pycparser/
 *.exe
+/test/test_goto.c_ast_generated.txt
+/test/test_goto.c_preprocessed.c
