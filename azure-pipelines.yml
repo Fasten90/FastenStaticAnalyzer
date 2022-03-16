@@ -40,10 +40,6 @@ stages:
     displayName: 'SystemTest'
     steps:
     - script: |
-        echo FastenDocSystem pipeline
-        python -m pip install -r requirements.txt
-        python PdfGenerator.py --input-path=input --export-pdf-file-path=out/FastenDoc.pdf
-        # '--open-after-generated' cannot use at pipeline
-    - publish: $(System.DefaultWorkingDirectory)/out/FastenDoc.pdf
-      artifact: FastenDocPdf
+        ./install.sh
+        ./test_exec.sh
 

@@ -1,18 +1,25 @@
-
+import argparse
 from enum import Enum
 
-import pycparser
+#import pycparser
+from pycparser.pycparser import c_ast, preprocess_file, parse_file
+
+
+# Working:
+#from pycparser.pycparser import c_ast
 
 """
 preprocess_file
 parse_file
 """
 
+
 func_declarations = set()
 func_calls = set()
 goto_used = set()
 return_used = set()
 func_calls_all = []
+
 
 class FileStaticAnalysisConfig():
 
@@ -90,7 +97,7 @@ class FileStaticAnalysis():
     def run(self):
 
         # Preprocess
-        preprocessed_file_content = pycparser.preprocess_file(
+        preprocessed_file_content = preprocess_file(
             self.__input_file_path,
             cpp_path=self.__preprocessor_path,
             cpp_args=self.__preprocessor_args)
@@ -101,7 +108,7 @@ class FileStaticAnalysis():
         # Parse
 
         # This only want preprocessed file!
-        self.__parse_result = pycparser.parse_file(self.__preprocessed_file_path)
+        self.__parse_result = parse_file(self.__preprocessed_file_path)
         # use_cpp=False, cpp_path='cpp', cpp_args='',
         #                parser=None
         # TODO: Test this: use_cpp=True - only for preprocessor
@@ -222,7 +229,7 @@ class FileStaticAnalysis():
 
         def find_return_in_recursive(item_list):
             return_count = 0
-            if isinstance(item_list, pycparser.c_ast.Return):
+            if isinstance(item_list, c_ast.Return):
                 return 1
             for item in item_list:
                 return_count += find_return_in_recursive(item)
@@ -231,20 +238,20 @@ class FileStaticAnalysis():
         # Explore AST - for return
         for ast_item in self.__parse_result:
             # print(str(ast_item))
-            if isinstance(ast_item, pycparser.c_ast.FuncDef):
+            if isinstance(ast_item, c_ast.FuncDef):
                 # Explore the body
                 function_name = ast_item.decl.name
                 return_count = 0
                 for body_item in ast_item.body:
                     # print(str(body_item))
-                    # if isinstance(body_item, pycparser.c_ast.Return):
+                    # if isinstance(body_item, c_ast.Return):
                     #    return_count += 1
                     return_count += find_return_in_recursive(body_item)
                 print("Function: '{}' has {} return".format(function_name, return_count))
 
 
 # Note: be careful, this was child of a pycparser class
-class FuncCallVisitor(pycparser.c_ast.NodeVisitor):
+class FuncCallVisitor(c_ast.NodeVisitor):
 
     def __init__(self):
         pass
@@ -265,7 +272,7 @@ class FuncCallVisitor(pycparser.c_ast.NodeVisitor):
             self.visit(node.args)  # Recursion
 
 
-class FuncDefVisitor(pycparser.c_ast.NodeVisitor):
+class FuncDefVisitor(c_ast.NodeVisitor):
     # Note: https://github.com/eliben/pycparser/blob/master/examples/func_defs.py
     def visit_FuncDef(self, node):
         # This was called by pycparser NodeVisitor automatically
@@ -276,7 +283,7 @@ class FuncDefVisitor(pycparser.c_ast.NodeVisitor):
 
 
 # Goto checker
-class GotoVisitor(pycparser.c_ast.NodeVisitor):
+class GotoVisitor(c_ast.NodeVisitor):
     # Note: https://github.com/eliben/pycparser/blob/master/examples/func_defs.py
     def visit_Goto(self, node):
         # This was called by pycparser NodeVisitor automatically
@@ -287,7 +294,7 @@ class GotoVisitor(pycparser.c_ast.NodeVisitor):
 
 
 # Return checker
-class ReturnVisitor(pycparser.c_ast.NodeVisitor):
+class ReturnVisitor(c_ast.NodeVisitor):
     def visit_Return(self, node):
         # This was called by pycparser NodeVisitor automatically
         #print("Return used '{}' at '{}'".format(node.name, node.coord))
@@ -297,35 +304,55 @@ class ReturnVisitor(pycparser.c_ast.NodeVisitor):
 
 
 if __name__ == "__main__":
-    # execute only if run as a script
-    # Test:
 
-    # test_file_path = r"test\test.c"
-    # test_file_path = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/StringHelper.c"
-    test_file_path = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
+    parser = argparse.ArgumentParser(description='Static Analyzer')
 
-    preprocessor_path = r"gcc"
+    parser.add_argument('--source', type=str,
+                        help='Source file for analysis')
+    parser.add_argument('--prepocessor', type=str,
+                        help='Preprocessor')
+    parser.add_argument('--preprocessor_args', type=str,
+                        help='Preprocessor args')
+
+    args = parser.parse_args()
+
+    # Example:
+    # --source
+    # args.source = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
+    # "-c " + 
+    source = args.source
+
+    #preprocessor_path = r"gcc"
+
     # preprocessor_args = "-E"
     # now, pycparser git repository has been downloaded into this directory (pycparser dir)
-    preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include"]
+    #preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include"]
+    if args.preprocessor_args:
+        args.preprocessor_args = [args.preprocessor_args, "-E", r"-Ipycparser/utils/fake_libc_include"]
+    else:
+        args.preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include"]
 
     # TODO: Add them to list
     # TODO: Read from file
     # Added because FastenHome
-    preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc/Common")
-    preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc/Common/Helper")
-    preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc")
-    preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Drivers/x86/Inc")
-    preprocessor_args.append("-DCONFIG_PLATFORM_X86")
-    preprocessor_args.append("-DCONFIG_USE_PANEL_PC")
+    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc/Common")
+    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc/Common/Helper")
+    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc")
+    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Drivers/x86/Inc")
+    #preprocessor_args.append("-DCONFIG_PLATFORM_X86")
+    #preprocessor_args.append("-DCONFIG_USE_PANEL_PC")
     # Could be use [] (list)
 
-    preprocessed_file_path = r"test\test_preprocessed.c"
+    #preprocessed_file_path = r"test\test_preprocessed.c"
+    preprocessed_file_path = args.source + '_preprocessed.c'
 
-    pycparser_ast_generated = r"test\ast_generated.txt"
+    #pycparser_ast_generated = r"test\ast_generated.txt"
+    pycparser_ast_generated = args.source + '_ast_generated.txt'
 
-    file_analysis = FileStaticAnalysis(test_file_path,
-                                       preprocessor_path, preprocessor_args, preprocessed_file_path,
+    file_analysis = FileStaticAnalysis(source,
+                                       args.prepocessor, args.preprocessor_args,
+                                       preprocessed_file_path,
                                        pycparser_ast_generated)
 
     file_analysis.run()
+

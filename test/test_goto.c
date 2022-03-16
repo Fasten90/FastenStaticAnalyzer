@@ -10,3 +10,7 @@ void hey(void)
     return;
 }
 
+void main(void)
+{
+    hey();
+}
