@@ -28,7 +28,10 @@ stages:
         ./install.sh
         python -m pip install -r requirements.txt
         python -m pip install pylint
-        pylint --disable=R,C FastenStaticAnalyzer.py 
+        # Catch the errors
+        pylint --disable=R,C,W FastenStaticAnalyzer.py
+        # Print all findings
+        pylint --exit-zero FastenStaticAnalyzer.py
 
 
   - job: FastenStaticAnalyzer_SystemTest

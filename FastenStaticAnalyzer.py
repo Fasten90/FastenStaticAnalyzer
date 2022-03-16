@@ -29,8 +29,8 @@ class FileStaticAnalysisConfig():
 
 
 class StaticAnalysisType(Enum):
-        DEFAULT = 1
-        OPTIONAL = 2
+    DEFAULT = 1
+    OPTIONAL = 2
 
 
 class FileStaticAnalysis():
@@ -101,7 +101,7 @@ class FileStaticAnalysis():
 
         # Parse
 
-        # This only want preprocessed file!
+        # Expect preprocessed file!
         self.__parse_result = parse_file(self.__preprocessed_file_path)
         # use_cpp=False, cpp_path='cpp', cpp_args='',
         #                parser=None
@@ -342,15 +342,15 @@ if __name__ == "__main__":
     # Could be use [] (list)
 
     #preprocessed_file_path = r"test\test_preprocessed.c"
-    preprocessed_file_path = args.source + '_preprocessed.c'
+    preprocessed_path = args.source + '_preprocessed.c'
 
     #pycparser_ast_generated = r"test\ast_generated.txt"
-    pycparser_ast_generated = args.source + '_ast_generated.txt'
+    ast_file_path = args.source + '_ast_generated.txt'
 
     file_analysis = FileStaticAnalysis(source,
                                        args.prepocessor, args.preprocessor_args,
-                                       preprocessed_file_path,
-                                       pycparser_ast_generated)
+                                       preprocessed_path,
+                                       ast_file_path)
 
     file_analysis.run()
 
