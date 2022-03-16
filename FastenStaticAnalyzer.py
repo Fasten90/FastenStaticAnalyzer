@@ -5,14 +5,6 @@ from enum import Enum
 from pycparser.pycparser import c_ast, preprocess_file, parse_file
 
 
-# Working:
-#from pycparser.pycparser import c_ast
-
-"""
-preprocess_file
-parse_file
-"""
-
 
 func_declarations = set()
 func_calls = set()
@@ -43,8 +35,8 @@ class FileStaticAnalysis():
 
     def __init__(self,
                  input_file_path,
-                 preprocessor_path, preprocessor_args, preprocessed_file_path,
-                 pycparser_ast_generated):
+                 preprocessor_path, preprocessor_args,
+                 preprocessed_file_path, pycparser_ast_generated):
         self.__input_file_path = input_file_path
         self.__preprocessor_path = preprocessor_path
         self.__preprocessor_args = preprocessor_args
@@ -117,7 +109,7 @@ class FileStaticAnalysis():
         #print(parse_result_str)
 
         # Save the AST to file
-        with open(pycparser_ast_generated, "w") as f:
+        with open(self.__pycparser_ast_generated, "w") as f:
             f.write(parse_result_str)
 
 
@@ -129,6 +121,8 @@ class FileStaticAnalysis():
         # TODO: Print AST
         #print("##########################")
         #parse_result.show()
+
+        result = []
 
         # Execute checker
         for checker in self.__analysis_list:
@@ -151,6 +145,8 @@ class FileStaticAnalysis():
                     print("This checker has been disabled: {}".format(checker["name"]))
             else:
                 raise Exception("Wrong StaticAnalysisType")
+
+        return result
 
 
     def FuncCall(self):
