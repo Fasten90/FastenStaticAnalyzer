@@ -1,8 +1,10 @@
 import argparse
 from enum import Enum
+import sys
 
 #import pycparser
-from pycparser.pycparser import c_ast, preprocess_file, parse_file
+sys.path.extend(['.', '..', 'pycparser'])
+from pycparser import c_ast, preprocess_file, parse_file
 
 
 

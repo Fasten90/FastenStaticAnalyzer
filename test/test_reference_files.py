@@ -2,6 +2,7 @@ import unittest
 
 from FastenStaticAnalyzer import FileStaticAnalysis
 
+
 class TestReferenceFiles(unittest.TestCase):
 
     def call_file_statis_analysis(self, source,
