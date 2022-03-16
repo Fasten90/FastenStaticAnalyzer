@@ -17,7 +17,7 @@ class TestReferenceFiles(unittest.TestCase):
                                    pycparser_ast_generated)
         return file_analysis.run()
 
-    def test_split(self):
+    def test_ref_goto(self):
         source = 'test/test_goto.c'
         result = self.call_file_statis_analysis(source)
         assert result == []
