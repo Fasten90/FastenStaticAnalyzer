@@ -7,3 +7,5 @@
 /test/test_goto.c_preprocessed.c
 /lextab.py
 /yacctab.py
+*preprocessed.c
+*_ast_generated.txt
