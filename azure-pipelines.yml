@@ -14,12 +14,9 @@ stages:
     displayName: 'UnitTest'
     steps:
     - script: |
-        echo FastenDocSystem pipeline
+        ./install.sh
         python -m pip install -r requirements.txt
         python -m unittest
-      # Publish file depends on test_pdf_generation output
-    - publish: $(System.DefaultWorkingDirectory)/testfile.pdf
-      artifact: TestPdf
 
 
   - job: FastenStaticAnalyzer_Pylint
@@ -28,10 +25,10 @@ stages:
     displayName: 'Pylint'
     steps:
     - script: |
-        echo FastenDocSystem pipeline
+        ./install.sh
         python -m pip install -r requirements.txt
         python -m pip install pylint
-        pylint --disable=R,C PdfGenerator.py 
+        pylint --disable=R,C FastenStaticAnalyzer.py 
 
 
   - job: FastenStaticAnalyzer_SystemTest
