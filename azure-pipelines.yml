@@ -16,7 +16,8 @@ stages:
     - script: |
         ./install.sh
         python -m pip install -r requirements.txt
-        python -m unittest
+        export PYTHONPATH="${PYTHONPATH}:${CWD}/pycparser"
+        python -m unittest discover
 
 
   - job: FastenStaticAnalyzer_Pylint
@@ -41,5 +42,6 @@ stages:
     steps:
     - script: |
         ./install.sh
+        export PYTHONPATH="${PYTHONPATH}:${CWD}/pycparser"
         ./test_exec.sh
 
