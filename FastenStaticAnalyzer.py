@@ -3,8 +3,9 @@ from enum import Enum
 import sys
 import os
 
-#import pycparser
-sys.path.extend(['.', '..', 'pycparser'])
+# Import the pycparser lib
+sys.path.append(os.path.join(os.path.dirname(__file__), "pycparser"))
+
 from pycparser import c_ast, preprocess_file, parse_file
 
 
