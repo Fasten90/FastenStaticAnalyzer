@@ -334,9 +334,9 @@ if __name__ == "__main__":
     # now, pycparser git repository has been downloaded into this directory (pycparser dir)
     #preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include"]
     if args.preprocessor_args:
-        args.preprocessor_args = [args.preprocessor_args, "-E", r"-Ipycparser/utils/fake_libc_include"]
+        args.preprocessor_args = [args.preprocessor_args, "-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
     else:
-        args.preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include"]
+        args.preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
 
     # TODO: Add them to list
     # TODO: Read from file
