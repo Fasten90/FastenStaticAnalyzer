@@ -91,6 +91,9 @@ class FileStaticAnalysis():
 
     def run(self):
 
+        if not os.path.exists(self.__input_file_path):
+            raise Exception('Source file does not exist!')
+
         # Preprocess
         preprocessed_file_content = preprocess_file(
             self.__input_file_path,

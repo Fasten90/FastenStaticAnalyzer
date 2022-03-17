@@ -1,7 +1,9 @@
 import unittest
 
-from FastenStaticAnalyzer import FileStaticAnalysis
+import sys
+sys.path.extend(['.', '..', 'pycparser', '../pycparser'])
 
+from FastenStaticAnalyzer import FileStaticAnalysis
 
 class TestReferenceFiles(unittest.TestCase):
 
