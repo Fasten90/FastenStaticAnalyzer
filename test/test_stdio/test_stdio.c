@@ -1,7 +1,11 @@
 /* Workaround for pycparser */
-typedef int _Bool
+#ifndef _Bool
+typedef int _Bool;
+#endif
 
-#include "stdio.h"
+#define _Atomic(_arg) _arg
+
+#include <stdio.h>
 //#include "testheader.h"
 
 int main(void)
