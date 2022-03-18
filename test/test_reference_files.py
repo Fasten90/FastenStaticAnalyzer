@@ -14,7 +14,7 @@ class TestReferenceFiles(unittest.TestCase):
                                            "-nostdinc",
                                            "-E",
                                            #"-D'__attribute__(x)='",
-                                           #"-D'_Atomic(_arg) _arg'",
+                                           "-D'_Atomic(_arg) _arg'",
                                            r"-Ipycparser/utils/fake_libc_include",
                                            r"-Iutils/fake_libc_include"]
                                   ):
