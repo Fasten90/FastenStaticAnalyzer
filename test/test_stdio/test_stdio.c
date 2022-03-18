@@ -1,4 +1,8 @@
+/* Workaround for pycparser */
+typedef int _Bool
+
 #include "stdio.h"
+//#include "testheader.h"
 
 int main(void)
 {
