@@ -13,9 +13,9 @@ class TestReferenceFiles(unittest.TestCase):
                                   pre_arg=['-std=c99',
                                            "-nostdinc",
                                            "-E",
-                                           "-D'__attribute__(x)='",
-                                           "-D'_Atomic(_arg) _arg'",
-                                           r"-I/pycparser/utils/fake_libc_include",
+                                           #"-D'__attribute__(x)='",
+                                           #"-D'_Atomic(_arg) _arg'",
+                                           r"-Ipycparser/utils/fake_libc_include",
                                            r"-Iutils/fake_libc_include"]
                                   ):
         preprocessed_file_path = source + '_ast_generated.txt'
