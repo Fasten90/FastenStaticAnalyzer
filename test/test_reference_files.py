@@ -36,11 +36,14 @@ class TestReferenceFiles(unittest.TestCase):
         source = 'test/test_2/test.c'
         from sys import platform
         if platform == "linux" or platform == "linux2":
-        # linux
+            # linux
+            pass
         elif platform == "darwin":
-        # OS X
+            # OS X
+            pass
         elif platform == "win32":
-        # Windows...
+            # Windows...
+            pass
 
         result = self.call_file_statis_analysis(source, preprocessor='gcc')
         assert result == []
