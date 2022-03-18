@@ -1,10 +1,14 @@
 /* Workaround for pycparser */
+
+
 #ifndef _Bool
 typedef int _Bool;
 #endif
 
-#define _Atomic(_arg) _arg
+//#define _Atomic(_arg) _arg
+#define _Atomic(T)              struct { T volatile __val; }
 
+#include <stdbool.h>
 #include <stdio.h>
 //#include "testheader.h"
 
