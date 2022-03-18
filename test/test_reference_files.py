@@ -11,7 +11,7 @@ class TestReferenceFiles(unittest.TestCase):
     def call_file_statis_analysis(self, source,
                                   preprocessor='gcc',
                                   # "-nostdinc",
-                                  pre_arg=["-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
+                                  pre_arg=['-std=c99', "-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
                                   ):
         preprocessed_file_path = source + '_ast_generated.txt'
         pycparser_ast_generated = source + '_preprocessed.c'
