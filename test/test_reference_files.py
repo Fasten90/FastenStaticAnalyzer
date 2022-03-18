@@ -28,7 +28,7 @@ class TestReferenceFiles(unittest.TestCase):
 
     def test_ref_2(self):
         source = 'test/test_2/test.c'
-        result = self.call_file_statis_analysis(source)
+        result = self.call_file_statis_analysis(source, preprocessor='clang')
         assert result == []
 
     def test_ref_simple_without_stdio(self):
@@ -38,7 +38,7 @@ class TestReferenceFiles(unittest.TestCase):
 
     def test_ref_stdio(self):
         source = 'test/test_stdio/test_stdio.c'
-        result = self.call_file_statis_analysis(source)
+        result = self.call_file_statis_analysis(source, preprocessor='clang')
         assert result == []
 
 
