@@ -10,7 +10,13 @@ class TestReferenceFiles(unittest.TestCase):
 
     def call_file_statis_analysis(self, source,
                                   preprocessor='gcc',
-                                  pre_arg=['-std=c11', "-nostdinc", "-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
+                                  pre_arg=['-std=c99',
+                                           "-nostdinc",
+                                           "-E",
+                                           "-D'__attribute__(x)='",
+                                           "-D'_Atomic(_arg) _arg'",
+                                           r"-I/pycparser/utils/fake_libc_include",
+                                           r"-Iutils/fake_libc_include"]
                                   ):
         preprocessed_file_path = source + '_ast_generated.txt'
         pycparser_ast_generated = source + '_preprocessed.c'
@@ -28,7 +34,15 @@ class TestReferenceFiles(unittest.TestCase):
 
     def test_ref_2(self):
         source = 'test/test_2/test.c'
-        result = self.call_file_statis_analysis(source, preprocessor='clang')
+        from sys import platform
+        if platform == "linux" or platform == "linux2":
+        # linux
+        elif platform == "darwin":
+        # OS X
+        elif platform == "win32":
+        # Windows...
+
+        result = self.call_file_statis_analysis(source, preprocessor='gcc')
         assert result == []
 
     def test_ref_simple_without_stdio(self):
@@ -38,7 +52,7 @@ class TestReferenceFiles(unittest.TestCase):
 
     def test_ref_stdio(self):
         source = 'test/test_stdio/test_stdio.c'
-        result = self.call_file_statis_analysis(source, preprocessor='clang')
+        result = self.call_file_statis_analysis(source, preprocessor='gcc')
         assert result == []
 
 
