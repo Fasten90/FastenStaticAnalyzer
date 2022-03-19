@@ -43,12 +43,12 @@ class TestReferenceFiles(unittest.TestCase):
                    r"-Ipycparser/utils/fake_libc_include"]
 
     def test_ref_goto(self):
-        source = 'test/test_goto.c'
+        source = 'test/test_1_goto/test_goto.c'
         result = self.call_file_statis_analysis(source)
         assert result == []
 
     def test_ref_2(self):
-        source = 'test/test_2/test.c'
+        source = 'test/test_2/test_2.c'
         result = self.call_file_statis_analysis(source, preprocessor='gcc', pre_arg=self.get_preprocessor_args_by_platform())
         assert result == []
 
