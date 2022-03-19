@@ -17,16 +17,6 @@ stages:
         ./install.sh
         python -m pip install -r requirements.txt
         export PYTHONPATH="${PYTHONPATH}:${CWD}/pycparser"
-
-        mkdir utils
-        cp -rf pycparser/utils/fake_libc_include utils/
-        mkdir fake_libc_include
-        cp -rf pycparser/utils/fake_libc_include/. fake_libc_include/
-        mkdir test/utils
-        cp -rf pycparser/utils/fake_libc_include test/utils/
-        mkdir test/fake_libc_include
-        cp -rf pycparser/utils/fake_libc_include/. test/fake_libc_include/
-        
         python -m unittest discover
 
 
