@@ -1,0 +1,47 @@
+  # Starter pipeline
+  # Start with a minimal pipeline that you can customize to build and deploy your code.
+  # Add steps that build, run tests, deploy, and more:
+  # https://aka.ms/yaml
+
+
+stages:
+- stage: Test
+  jobs:
+
+  - job: FastenStaticAnalyzer_UnitTest
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: 'UnitTest'
+    steps:
+    - script: |
+        ./install.sh
+        python -m pip install -r requirements.txt
+        export PYTHONPATH="${PYTHONPATH}:${CWD}/pycparser"
+        python -m unittest discover
+
+
+  - job: FastenStaticAnalyzer_Pylint
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: 'Pylint'
+    steps:
+    - script: |
+        ./install.sh
+        python -m pip install -r requirements.txt
+        python -m pip install pylint
+        # Catch the errors
+        pylint --disable=R,C,W FastenStaticAnalyzer.py
+        # Print all findings
+        pylint --exit-zero FastenStaticAnalyzer.py
+
+
+  - job: FastenStaticAnalyzer_SystemTest
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: 'SystemTest'
+    steps:
+    - script: |
+        ./install.sh
+        export PYTHONPATH="${PYTHONPATH}:${CWD}/pycparser"
+        ./test_exec.sh
+
