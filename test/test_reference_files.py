@@ -30,8 +30,7 @@ class TestReferenceFiles(unittest.TestCase):
              "-E",
              "-D_Atomic(_arg)=_arg",  # Important requirement. Without this I will get at Ubuntu:
             # pycparser.plyparser.ParseError: pycparser/utils/fake_libc_include/_fake_typedefs.h:175:24: before: atomic_bool
-             r"-Ipycparser/utils/fake_libc_include",
-             r"-Iutils/fake_libc_include"]
+             r"-Ipycparser/utils/fake_libc_include"]
         elif platform == "darwin":
             # OS X
             raise Exception('Unsupported OS')
@@ -41,8 +40,7 @@ class TestReferenceFiles(unittest.TestCase):
                    "-nostdinc",
                    "-E",
                    #"-D_Atomic(_arg)=_arg", # Windows GCC does not require it
-                   r"-Ipycparser/utils/fake_libc_include",
-                   r"-Iutils/fake_libc_include"]
+                   r"-Ipycparser/utils/fake_libc_include"]
 
     def test_ref_goto(self):
         source = 'test/test_goto.c'
