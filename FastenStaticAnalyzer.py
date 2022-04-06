@@ -9,13 +9,15 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "pycparser"))
 from pycparser import c_ast, preprocess_file, parse_file
 
 
-
 func_declarations = set()
 func_calls = set()
 goto_used = set()
 return_used = set()
 func_calls_all = []
 
+
+def debug_print(msg):
+    print(msg)
 
 class FileStaticAnalysisConfig():
 
@@ -80,6 +82,7 @@ class FileStaticAnalysis():
                 "name": "Goto",
                 "type": StaticAnalysisType.OPTIONAL,
                 "config": self.__config.CONFIG_ANALYSE_GOTO,
+                "requirements": { "group": "Misra 2004", "rule": "Rule 14.4", "category": "required", "description": "The goto statement shall not be used" },
                 "checker": self.Goto
             },
             {
@@ -89,6 +92,8 @@ class FileStaticAnalysis():
                 "checker": self.Return
             }
         ]
+
+        self.__analysis_result = []
 
     def run(self):
 
@@ -119,7 +124,6 @@ class FileStaticAnalysis():
         with open(self.__pycparser_ast_generated, "w") as f:
             f.write(parse_result_str)
 
-
         # Print AST
         #print("##########################")
         #for ast_item in parse_result:
@@ -129,12 +133,13 @@ class FileStaticAnalysis():
         #print("##########################")
         #parse_result.show()
 
-        result = []
+        result_all = []
 
         # Execute checker
         for checker in self.__analysis_list:
+            result = None
             if checker["type"] == StaticAnalysisType.DEFAULT:
-                checker["checker"]()
+                result = checker["checker"]()
             elif checker["type"] == StaticAnalysisType.OPTIONAL:
                 if checker["config"]:
                     # Enabled, run
@@ -142,7 +147,7 @@ class FileStaticAnalysis():
                     print("This checker is enabled, execute: {}".format(checker["name"]))
                     print("######################")
                     print("")
-                    checker["checker"]()
+                    result = checker["checker"]()
                     print("")
                     print("This checker has finished: {}".format(checker["name"]))
                     print("-----------------------")
@@ -152,8 +157,10 @@ class FileStaticAnalysis():
                     print("This checker has been disabled: {}".format(checker["name"]))
             else:
                 raise Exception("Wrong StaticAnalysisType")
+            if result:
+                result_all.append(result)
 
-        return result
+        return result_all
 
 
     def FuncCall(self):
@@ -219,8 +226,10 @@ class FileStaticAnalysis():
 
         goto_used_str = "".join(item + "\n" for item in goto_used)
 
-        print("Goto used:")
-        print(goto_used_str)
+        debug_print("Goto used: {}".format(goto_used_str))
+
+        res = goto_used
+        return res
 
 
     def Return(self):
@@ -244,13 +253,13 @@ class FileStaticAnalysis():
             if isinstance(ast_item, c_ast.FuncDef):
                 # Explore the body
                 function_name = ast_item.decl.name
-                return_count = 0
+                return_all_count = 0
                 for body_item in ast_item.body:
                     # print(str(body_item))
                     # if isinstance(body_item, c_ast.Return):
-                    #    return_count += 1
-                    return_count += find_return_in_recursive(body_item)
-                print("Function: '{}' has {} return".format(function_name, return_count))
+                    #    return_all_count += 1
+                    return_all_count += find_return_in_recursive(body_item)
+                print("Function: '{}' has {} return".format(function_name, return_all_count))
 
 
 # Note: be careful, this was child of a pycparser class
@@ -360,5 +369,8 @@ if __name__ == "__main__":
                                        preprocessed_path,
                                        ast_file_path)
 
-    file_analysis.run()
+    analysis_result = file_analysis.run()
+    print("Results: \n" \
+          "{}".format(analysis_result))
+    # TODO: Expport to doc?
 
