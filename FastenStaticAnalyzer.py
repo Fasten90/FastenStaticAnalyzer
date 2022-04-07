@@ -238,11 +238,12 @@ class FileStaticAnalysis():
 
 
     def Return(self):
-
         # Return
         # TODO: Cannot check easily, which function' return
         # checker_obj = ReturnVisitor()
         # checker_obj.visit(parse_result)
+
+        res = []
 
         def find_return_in_recursive(item_list):
             return_count = 0
@@ -265,6 +266,14 @@ class FileStaticAnalysis():
                     #    return_all_count += 1
                     return_all_count += find_return_in_recursive(body_item)
                 print("Function: '{}' has {} return".format(function_name, return_all_count))
+            # Check result:
+            if return_all_count > 1:
+                # Save as wrong
+                print('ISSUE: More return than 1')  # TODO: New function for this
+                res.append((function_name, return_all_count))
+
+        # res will contains function_name - return count pairs (which are issues)
+        return res
 
 
 # Note: be careful, this was child of a pycparser class
@@ -377,5 +386,6 @@ if __name__ == "__main__":
     analysis_result = file_analysis.run()
     print("Results: \n" \
           "{}".format(analysis_result))
+
     # TODO: Expport to doc?
 
