@@ -16,8 +16,13 @@ return_used = set()
 func_calls_all = []
 
 
+# Debug functions
+
+DEBUG_AST = False
+
 def debug_print(msg):
     print(msg)
+
 
 class FileStaticAnalysisConfig():
 
@@ -124,14 +129,14 @@ class FileStaticAnalysis():
         with open(self.__pycparser_ast_generated, "w") as f:
             f.write(parse_result_str)
 
-        # Print AST
-        #print("##########################")
-        #for ast_item in parse_result:
-        #    print(str(ast_item))
+        if DEBUG_AST:
+            # Print AST
+            print("##########################")
+            for ast_item in parse_result:
+                print(str(ast_item))
 
-        # TODO: Print AST
-        #print("##########################")
-        #parse_result.show()
+            print("##########################")
+            parse_result.show()
 
         result_all = []
 
