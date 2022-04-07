@@ -268,11 +268,11 @@ function" },
                     #    return_all_count += 1
                     return_all_count += find_return_in_recursive(body_item)
                 print("Function: '{}' has {} return".format(function_name, return_all_count))
-            # Check result:
-            if return_all_count > 1:
-                # Save as wrong
-                print('ISSUE: More return than 1')  # TODO: New function for this
-                res.append((function_name, return_all_count))
+                # Check result:
+                if return_all_count > 1:
+                    # Save as wrong
+                    print('ISSUE: More return than 1')  # TODO: New function for this
+                    res.append((function_name, return_all_count))
 
         # res will contains function_name - return count pairs (which are issues)
         return res
