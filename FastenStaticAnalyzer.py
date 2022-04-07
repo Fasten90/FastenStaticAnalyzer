@@ -94,6 +94,8 @@ class FileStaticAnalysis():
                 "name": "Return",
                 "type": StaticAnalysisType.OPTIONAL,
                 "config": self.__config.CONFIG_ANALYSE_RETURN,
+                "requirements": { "group": "Misra 2004", "rule": "Rule 14.7", "category": "required", "description": "A function shall have a single point of exit at the end of the
+function" },        
                 "checker": self.Return
             }
         ]
