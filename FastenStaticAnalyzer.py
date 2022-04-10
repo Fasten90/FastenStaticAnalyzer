@@ -169,8 +169,6 @@ class FileStaticAnalysis():
         return result_all
 
     def call_checker(self, checker):
-        global actual_running_checker
-        actual_running_checker = checker
         # Call the checker
         checker_result = checker["checker"]()
         res = []
@@ -178,7 +176,6 @@ class FileStaticAnalysis():
             for item in checker_result:
                 res.append({'checker': checker["name"], 'error': item})
         return res
-
 
     def FuncCall(self):
         checker_obj = FuncCallVisitor()
@@ -238,6 +235,9 @@ class FileStaticAnalysis():
 
     def Goto(self):
         # Goto
+        global goto_used
+        goto_used = set()
+
         checker_obj = GotoVisitor()
         checker_obj.visit(self.__parse_result)
 
