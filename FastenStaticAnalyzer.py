@@ -87,14 +87,14 @@ class FileStaticAnalysis():
                 "name": "Goto",
                 "type": StaticAnalysisType.OPTIONAL,
                 "config": self.__config.CONFIG_ANALYSE_GOTO,
-                "requirements": { "group": "Misra 2004", "rule": "Rule 14.4", "category": "required", "description": "The goto statement shall not be used" },
+                "requirements": {"group": "Misra 2004", "rule": "Rule 14.4", "category": "required", "description": "The goto statement shall not be used" },
                 "checker": self.Goto
             },
             {
                 "name": "Return",
                 "type": StaticAnalysisType.OPTIONAL,
                 "config": self.__config.CONFIG_ANALYSE_RETURN,
-                "requirements": { "group": "Misra 2004", "rule": "Rule 14.7", "category": "required", "description": "A function shall have a single point of exit at the end of the function" },
+                "requirements": {"group": "Misra 2004", "rule": "Rule 14.7", "category": "required", "description": "A function shall have a single point of exit at the end of the function" },
                 "checker": self.Return
             }
         ]
@@ -332,14 +332,16 @@ class ReturnVisitor(c_ast.NodeVisitor):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Static Analyzer')
+    parser = argparse.ArgumentParser(description='Fasten Static Analyzer')
 
     parser.add_argument('--source', type=str,
                         help='Source file for analysis')
     parser.add_argument('--prepocessor', type=str,
-                        help='Preprocessor')
+                        help='Preprocessor\n'
+                             'E.g.: gcc')
     parser.add_argument('--preprocessor_args', type=str,
-                        help='Preprocessor args')
+                        help='Preprocessor args\n'
+                             'E.g. -Iinc')
 
     args = parser.parse_args()
 
