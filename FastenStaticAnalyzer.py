@@ -2,6 +2,7 @@ import argparse
 from enum import Enum
 import sys
 import os
+import csv
 
 # Import the pycparser lib
 sys.path.append(os.path.join(os.path.dirname(__file__), "pycparser"))
@@ -330,6 +331,21 @@ class ReturnVisitor(c_ast.NodeVisitor):
         return_used.add(node.coord)
 
 
+def export_result_by_source_file(result_list, source_file, export_filename='static_analysis_result.csv'):
+    if result_list:
+        # Create CSV
+        with open(export_filename, mode='w', newline='', encoding='utf-8') as csv_file:
+            #fieldnames = ['file_path', 'line', 'assert_string', 'assert_result', 'error_string']
+            fieldnames = ['file_path', 'line', 'error']
+            # TODO: Workaround
+            line = 0
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in result_list:
+                writer.writerow({'file_path': source_file, 'line': line, 'error': row})
+            print('Exported to {}'.format(export_filename))
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Fasten Static Analyzer')
@@ -387,8 +403,9 @@ if __name__ == "__main__":
                                        ast_file_path)
 
     analysis_result = file_analysis.run()
-    print("Results: \n" \
+    print("Results: \n"
           "{}".format(analysis_result))
 
-    # TODO: Expport to doc?
+    # TODO: export file by argument
+    export_result_by_source_file(analysis_result, source, export_filename='StaticAnalysisResult.csv')
 
