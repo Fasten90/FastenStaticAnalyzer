@@ -16,7 +16,6 @@ goto_used = set()
 return_used = set()
 func_calls_all = []
 
-
 # Debug functions
 
 DEBUG_AST = False
@@ -146,7 +145,7 @@ class FileStaticAnalysis():
         for checker in self.__analysis_list:
             result = None
             if checker["type"] == StaticAnalysisType.DEFAULT:
-                result = checker["checker"]()
+                result = self.call_checker(checker)
             elif checker["type"] == StaticAnalysisType.OPTIONAL:
                 if checker["config"]:
                     # Enabled, run
@@ -154,7 +153,7 @@ class FileStaticAnalysis():
                     print("This checker is enabled, execute: {}".format(checker["name"]))
                     print("######################")
                     print("")
-                    result = checker["checker"]()
+                    result = self.call_checker(checker)
                     print("")
                     print("This checker has finished: {}".format(checker["name"]))
                     print("-----------------------")
@@ -165,9 +164,20 @@ class FileStaticAnalysis():
             else:
                 raise Exception("Wrong StaticAnalysisType")
             if result:
-                result_all.append(result)
+                result_all.extend(result)
 
         return result_all
+
+    def call_checker(self, checker):
+        global actual_running_checker
+        actual_running_checker = checker
+        # Call the checker
+        checker_result = checker["checker"]()
+        res = []
+        if checker_result:
+            for item in checker_result:
+                res.append({'checker': checker["name"], 'error': item})
+        return res
 
 
     def FuncCall(self):
@@ -235,8 +245,7 @@ class FileStaticAnalysis():
 
         debug_print("Goto used: {}".format(goto_used_str))
 
-        res = goto_used
-        return res
+        return goto_used
 
 
     def Return(self):
@@ -329,6 +338,10 @@ class ReturnVisitor(c_ast.NodeVisitor):
 
         global return_used
         return_used.add(node.coord)
+
+
+def get_my_checker():
+    return actual_running_checker
 
 
 def export_result_by_source_file(result_list, source_file, export_filename='static_analysis_result.csv'):
