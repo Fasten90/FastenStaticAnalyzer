@@ -7,7 +7,7 @@ import csv
 # Import the pycparser lib
 sys.path.append(os.path.join(os.path.dirname(__file__), "pycparser"))
 
-from pycparser import c_ast, preprocess_file, parse_file
+from pycparser import c_ast, preprocess_file, parse_file # pylint: disable=wrong-import-position
 
 
 func_declarations = set()
@@ -87,14 +87,14 @@ class FileStaticAnalysis():
                 "name": "Goto",
                 "type": StaticAnalysisType.OPTIONAL,
                 "config": self.__config.CONFIG_ANALYSE_GOTO,
-                "requirements": {"group": "Misra 2004", "rule": "Rule 14.4", "category": "required", "description": "The goto statement shall not be used" },
+                "requirements": {"group": "Misra 2004", "rule": "Rule 14.4", "category": "required", "description": "The goto statement shall not be used"},
                 "checker": self.Goto
             },
             {
                 "name": "Return",
                 "type": StaticAnalysisType.OPTIONAL,
                 "config": self.__config.CONFIG_ANALYSE_RETURN,
-                "requirements": {"group": "Misra 2004", "rule": "Rule 14.7", "category": "required", "description": "A function shall have a single point of exit at the end of the function" },
+                "requirements": {"group": "Misra 2004", "rule": "Rule 14.7", "category": "required", "description": "A function shall have a single point of exit at the end of the function"},
                 "checker": self.Return
             }
         ]
@@ -133,11 +133,11 @@ class FileStaticAnalysis():
         if DEBUG_AST:
             # Print AST
             print("##########################")
-            for ast_item in parse_result:
+            for ast_item in self.__parse_result:
                 print(str(ast_item))
 
             print("##########################")
-            parse_result.show()
+            self.__parse_result.show()
 
         result_all = []
 
@@ -229,8 +229,8 @@ class FileStaticAnalysis():
         for key, value in func_call_all_list.items():
             print("'{}' called from:\n"
                   "{}".format(
-                key,
-                "".join(["  " + item.file + ":" + str(item.line) + "\n" for item in value])))
+                      key,
+                      "".join(["  " + item.file + ":" + str(item.line) + "\n" for item in value])))
 
 
     def Goto(self):
@@ -340,10 +340,6 @@ class ReturnVisitor(c_ast.NodeVisitor):
         return_used.add(node.coord)
 
 
-def get_my_checker():
-    return actual_running_checker
-
-
 def export_result_by_source_file(result_list, source_file, export_filename='static_analysis_result.csv'):
     if result_list:
         # Create CSV
@@ -377,7 +373,7 @@ if __name__ == "__main__":
     # Example:
     # --source
     # args.source = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
-    # "-c " + 
+    # "-c " +
     source = args.source
 
     if not os.path.exists(source):
@@ -421,4 +417,3 @@ if __name__ == "__main__":
 
     # TODO: export file by argument
     export_result_by_source_file(analysis_result, source, export_filename='StaticAnalysisResult.csv')
-
