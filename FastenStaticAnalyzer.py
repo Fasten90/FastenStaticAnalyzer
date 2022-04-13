@@ -344,18 +344,18 @@ def export_result_by_source_file(result_list, source_file, export_filename='stat
     if result_list:
         # Create CSV
         with open(export_filename, mode='w', newline='', encoding='utf-8') as csv_file:
-            #fieldnames = ['file_path', 'line', 'assert_string', 'assert_result', 'error_string']
-            fieldnames = ['file_path', 'line', 'error']
+            # TODO: Extend with more field
+            fieldnames = ['file_path', 'line', 'checker', 'error']
             # TODO: Workaround
             line = 0
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             writer.writeheader()
             for row in result_list:
-                writer.writerow({'file_path': source_file, 'line': line, 'error': row})
+                writer.writerow({'file_path': source_file, 'line': line, 'checker': row['checker'], 'error': row['error']})
             print('Exported to {}'.format(export_filename))
 
 
-if __name__ == "__main__":
+def main():
 
     parser = argparse.ArgumentParser(description='Fasten Static Analyzer')
 
@@ -377,7 +377,7 @@ if __name__ == "__main__":
     source = args.source
 
     if not os.path.exists(source):
-        raise Exception('Source file does not exist!')
+        raise Exception('Source file does not exist: {}'.format(source))
 
     #preprocessor_path = r"gcc"
 
@@ -417,3 +417,7 @@ if __name__ == "__main__":
 
     # TODO: export file by argument
     export_result_by_source_file(analysis_result, source, export_filename='StaticAnalysisResult.csv')
+
+
+if __name__ == "__main__":
+    main()
