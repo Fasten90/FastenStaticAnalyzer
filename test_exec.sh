@@ -1,4 +1,4 @@
-#!/bin/#!/usr/bin/env bash
+#!/bin/bash
 echo "Test Exec"
 
 python FastenStaticAnalyzer.py --source="test/test_1_goto/test_goto.c" --prepocessor="gcc" --preprocessor_args=""
