@@ -373,6 +373,9 @@ def main():
                              'E.g. -Iinc')
     parser.add_argument('--delete_temporary_files', action='store_true',
                         help='Remove temporary files (preprocessed files)')
+    parser.add_argument('--export_file', type=str,
+                        default='StaticAnalysisResult.csv',
+                        help='Export file path')
 
     args = parser.parse_args()
 
@@ -406,8 +409,7 @@ def main():
     print("Results: \n"
           "{}".format(analysis_result))
 
-    # TODO: Add export file_path to argument
-    export_result_by_source_file(analysis_result, args.source, export_filename='StaticAnalysisResult.csv')
+    export_result_by_source_file(analysis_result, args.source, export_filename=args.export_file)
 
     # If remove required
     if args.delete_temporary_files:

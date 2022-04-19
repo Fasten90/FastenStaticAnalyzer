@@ -33,6 +33,19 @@ class TestSystem(unittest.TestCase):
             'python FastenStaticAnalyzer.py --source="test/test_system_call_3/test.c" --delete_temporary_files',
             shell=True)
 
+    def test_system_call_4(self):
+        # Cannot debug
+        import subprocess
+        subprocess.call(
+            'python FastenStaticAnalyzer.py --source="test/test_system_call_3/test.c" --export_file=bla_result.txt',
+            shell=True)
+
+    def test_system_call_5(self):
+        # Cannot debug
+        import subprocess
+        subprocess.call(
+            'python FastenStaticAnalyzer.py --help,
+            shell=True)
 
 if __name__ == '__main__':
     unittest.main()
