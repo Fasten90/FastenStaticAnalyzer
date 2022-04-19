@@ -377,8 +377,7 @@ def main():
     args = parser.parse_args()
 
     # Example:
-    # --source
-    # E.g. args.source = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
+    # --source="../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
     if not os.path.exists(args.source):
         raise Exception('Source file does not exist: {}'.format(args.source))
         # TODO: Support glob
