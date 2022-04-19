@@ -124,7 +124,6 @@ class FileStaticAnalysis():
         # TODO: Test this: use_cpp=True - only for preprocessor
 
         parse_result_str = str(self.__parse_result)
-        #print(parse_result_str)
 
         # Save the AST to file
         with open(self.__pycparser_ast_generated, "w") as f:
@@ -355,59 +354,52 @@ def export_result_by_source_file(result_list, source_file, export_filename='stat
             print('Exported to {}'.format(export_filename))
 
 
+def remove_temporary_file(file_path):
+    print('Remove temporary file: {}'.format(file_path))
+    os.remove(file_path)
+
+
 def main():
 
     parser = argparse.ArgumentParser(description='Fasten Static Analyzer')
 
     parser.add_argument('--source', type=str,
                         help='Source file for analysis')
-    parser.add_argument('--prepocessor', type=str,
+    parser.add_argument('--preprocessor', type=str,
                         help='Preprocessor\n'
                              'E.g.: gcc')
     parser.add_argument('--preprocessor_args', type=str,
                         help='Preprocessor args\n'
                              'E.g. -Iinc')
+    parser.add_argument('--delete_temporary_files', action='store_true',
+                        help='Remove temporary files (preprocessed files)')
 
     args = parser.parse_args()
 
     # Example:
     # --source
-    # args.source = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
-    # "-c " +
-    source = args.source
+    # E.g. args.source = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
+    if not os.path.exists(args.source):
+        raise Exception('Source file does not exist: {}'.format(args.source))
+        # TODO: Support glob
 
-    if not os.path.exists(source):
-        raise Exception('Source file does not exist: {}'.format(source))
+    if not args.preprocessor:
+        args.preprocessor = 'gcc'
+        print('Use default preprocessor: {}'.format(args.preprocessor))
 
-    #preprocessor_path = r"gcc"
-
-    # preprocessor_args = "-E"
+    # At general C compilers, the "-E" is the preprocessing. It is required for pycparser
     # now, pycparser git repository has been downloaded into this directory (pycparser dir)
-    #preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include"]
     if args.preprocessor_args:
         args.preprocessor_args = args.preprocessor_args.split(' ') + ["-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
     else:
         args.preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
 
-    # TODO: Add them to list
-    # TODO: Read from file
-    # Added because FastenHome
-    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc/Common")
-    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc/Common/Helper")
-    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc")
-    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Drivers/x86/Inc")
-    #preprocessor_args.append("-DCONFIG_PLATFORM_X86")
-    #preprocessor_args.append("-DCONFIG_USE_PANEL_PC")
-    # Could be use [] (list)
-
-    #preprocessed_file_path = r"test\test_preprocessed.c"
     preprocessed_path = args.source + '_preprocessed.c'
 
-    #pycparser_ast_generated = r"test\ast_generated.txt"
     ast_file_path = args.source + '_ast_generated.txt'
 
-    file_analysis = FileStaticAnalysis(source,
-                                       args.prepocessor, args.preprocessor_args,
+    file_analysis = FileStaticAnalysis(args.source,
+                                       args.preprocessor, args.preprocessor_args,
                                        preprocessed_path,
                                        ast_file_path)
 
@@ -415,8 +407,13 @@ def main():
     print("Results: \n"
           "{}".format(analysis_result))
 
-    # TODO: export file by argument
-    export_result_by_source_file(analysis_result, source, export_filename='StaticAnalysisResult.csv')
+    # TODO: Add export file_path to argument
+    export_result_by_source_file(analysis_result, args.source, export_filename='StaticAnalysisResult.csv')
+
+    # If remove required
+    if args.delete_temporary_files:
+        remove_temporary_file(preprocessed_path)
+        remove_temporary_file(ast_file_path)
 
 
 if __name__ == "__main__":
