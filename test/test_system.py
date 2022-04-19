@@ -44,7 +44,7 @@ class TestSystem(unittest.TestCase):
         # Cannot debug
         import subprocess
         subprocess.call(
-            'python FastenStaticAnalyzer.py --help,
+            'python FastenStaticAnalyzer.py --help',
             shell=True)
 
 if __name__ == '__main__':
