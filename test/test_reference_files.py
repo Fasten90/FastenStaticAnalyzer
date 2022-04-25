@@ -45,7 +45,7 @@ class TestReferenceFiles(unittest.TestCase):
     def test_ref_goto(self):
         source = 'test/test_1_goto/test_goto.c'
         result = self.call_file_statis_analysis(source)
-        assert result == []
+        assert result == [{'checker': 'Goto', 'error': 'blabla'}]
 
     def test_ref_2(self):
         source = 'test/test_2/test_2.c'
@@ -62,6 +62,10 @@ class TestReferenceFiles(unittest.TestCase):
         result = self.call_file_statis_analysis(source, preprocessor='gcc', pre_arg=self.get_preprocessor_args_by_platform())
         assert result == []
 
+    def test_ref_return(self):
+        source = 'test/test_return/test_return_more.c'
+        result = self.call_file_statis_analysis(source, preprocessor='gcc', pre_arg=self.get_preprocessor_args_by_platform())
+        assert result == [{'checker': 'Return', 'error': ('more_return', 2)}]
 
 if __name__ == '__main__':
     unittest.main()

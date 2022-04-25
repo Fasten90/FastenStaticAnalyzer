@@ -9,3 +9,4 @@
 /yacctab.py
 *preprocessed.c
 *_ast_generated.txt
+/StaticAnalysisResult.csv

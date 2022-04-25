@@ -2,12 +2,12 @@ import argparse
 from enum import Enum
 import sys
 import os
+import csv
 
 # Import the pycparser lib
 sys.path.append(os.path.join(os.path.dirname(__file__), "pycparser"))
 
-from pycparser import c_ast, preprocess_file, parse_file
-
+from pycparser import c_ast, preprocess_file, parse_file # pylint: disable=wrong-import-position
 
 
 func_declarations = set()
@@ -15,6 +15,13 @@ func_calls = set()
 goto_used = set()
 return_used = set()
 func_calls_all = []
+
+# Debug functions
+
+DEBUG_AST = False
+
+def debug_print(msg):
+    print(msg)
 
 
 class FileStaticAnalysisConfig():
@@ -80,15 +87,19 @@ class FileStaticAnalysis():
                 "name": "Goto",
                 "type": StaticAnalysisType.OPTIONAL,
                 "config": self.__config.CONFIG_ANALYSE_GOTO,
+                "requirements": {"group": "Misra 2004", "rule": "Rule 14.4", "category": "required", "description": "The goto statement shall not be used"},
                 "checker": self.Goto
             },
             {
                 "name": "Return",
                 "type": StaticAnalysisType.OPTIONAL,
                 "config": self.__config.CONFIG_ANALYSE_RETURN,
+                "requirements": {"group": "Misra 2004", "rule": "Rule 14.7", "category": "required", "description": "A function shall have a single point of exit at the end of the function"},
                 "checker": self.Return
             }
         ]
+
+        self.__analysis_result = []
 
     def run(self):
 
@@ -113,28 +124,27 @@ class FileStaticAnalysis():
         # TODO: Test this: use_cpp=True - only for preprocessor
 
         parse_result_str = str(self.__parse_result)
-        #print(parse_result_str)
 
         # Save the AST to file
         with open(self.__pycparser_ast_generated, "w") as f:
             f.write(parse_result_str)
 
+        if DEBUG_AST:
+            # Print AST
+            print("##########################")
+            for ast_item in self.__parse_result:
+                print(str(ast_item))
 
-        # Print AST
-        #print("##########################")
-        #for ast_item in parse_result:
-        #    print(str(ast_item))
+            print("##########################")
+            self.__parse_result.show()
 
-        # TODO: Print AST
-        #print("##########################")
-        #parse_result.show()
-
-        result = []
+        result_all = []
 
         # Execute checker
         for checker in self.__analysis_list:
+            result = None
             if checker["type"] == StaticAnalysisType.DEFAULT:
-                checker["checker"]()
+                result = self.call_checker(checker)
             elif checker["type"] == StaticAnalysisType.OPTIONAL:
                 if checker["config"]:
                     # Enabled, run
@@ -142,7 +152,7 @@ class FileStaticAnalysis():
                     print("This checker is enabled, execute: {}".format(checker["name"]))
                     print("######################")
                     print("")
-                    checker["checker"]()
+                    result = self.call_checker(checker)
                     print("")
                     print("This checker has finished: {}".format(checker["name"]))
                     print("-----------------------")
@@ -152,9 +162,19 @@ class FileStaticAnalysis():
                     print("This checker has been disabled: {}".format(checker["name"]))
             else:
                 raise Exception("Wrong StaticAnalysisType")
+            if result:
+                result_all.extend(result)
 
-        return result
+        return result_all
 
+    def call_checker(self, checker):
+        # Call the checker
+        checker_result = checker["checker"]()
+        res = []
+        if checker_result:
+            for item in checker_result:
+                res.append({'checker': checker["name"], 'error': item})
+        return res
 
     def FuncCall(self):
         checker_obj = FuncCallVisitor()
@@ -208,27 +228,32 @@ class FileStaticAnalysis():
         for key, value in func_call_all_list.items():
             print("'{}' called from:\n"
                   "{}".format(
-                key,
-                "".join(["  " + item.file + ":" + str(item.line) + "\n" for item in value])))
+                      key,
+                      "".join(["  " + item.file + ":" + str(item.line) + "\n" for item in value])))
 
 
     def Goto(self):
         # Goto
+        global goto_used
+        goto_used = set()
+
         checker_obj = GotoVisitor()
         checker_obj.visit(self.__parse_result)
 
         goto_used_str = "".join(item + "\n" for item in goto_used)
 
-        print("Goto used:")
-        print(goto_used_str)
+        debug_print("Goto used: {}".format(goto_used_str))
+
+        return goto_used
 
 
     def Return(self):
-
         # Return
         # TODO: Cannot check easily, which function' return
         # checker_obj = ReturnVisitor()
         # checker_obj.visit(parse_result)
+
+        res = []
 
         def find_return_in_recursive(item_list):
             return_count = 0
@@ -244,13 +269,21 @@ class FileStaticAnalysis():
             if isinstance(ast_item, c_ast.FuncDef):
                 # Explore the body
                 function_name = ast_item.decl.name
-                return_count = 0
+                return_all_count = 0
                 for body_item in ast_item.body:
                     # print(str(body_item))
                     # if isinstance(body_item, c_ast.Return):
-                    #    return_count += 1
-                    return_count += find_return_in_recursive(body_item)
-                print("Function: '{}' has {} return".format(function_name, return_count))
+                    #    return_all_count += 1
+                    return_all_count += find_return_in_recursive(body_item)
+                print("Function: '{}' has {} return".format(function_name, return_all_count))
+                # Check result:
+                if return_all_count > 1:
+                    # Save as wrong
+                    print('ISSUE: More return than 1')  # TODO: New function for this
+                    res.append((function_name, return_all_count))
+
+        # res will contains function_name - return count pairs (which are issues)
+        return res
 
 
 # Note: be careful, this was child of a pycparser class
@@ -306,59 +339,83 @@ class ReturnVisitor(c_ast.NodeVisitor):
         return_used.add(node.coord)
 
 
-if __name__ == "__main__":
+def export_result_by_source_file(result_list, source_file, export_filename='static_analysis_result.csv'):
+    if result_list:
+        # Create CSV
+        with open(export_filename, mode='w', newline='', encoding='utf-8') as csv_file:
+            # TODO: Extend with more field
+            fieldnames = ['file_path', 'line', 'checker', 'error']
+            # TODO: Workaround
+            line = 0
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in result_list:
+                writer.writerow({'file_path': source_file, 'line': line, 'checker': row['checker'], 'error': row['error']})
+            print('Exported to {}'.format(export_filename))
 
-    parser = argparse.ArgumentParser(description='Static Analyzer')
+
+def remove_temporary_file(file_path):
+    print('Remove temporary file: {}'.format(file_path))
+    os.remove(file_path)
+
+
+def main():
+
+    parser = argparse.ArgumentParser(description='Fasten Static Analyzer')
 
     parser.add_argument('--source', type=str,
                         help='Source file for analysis')
-    parser.add_argument('--prepocessor', type=str,
-                        help='Preprocessor')
+    parser.add_argument('--preprocessor', type=str,
+                        help='Preprocessor\n'
+                             'E.g.: gcc')
     parser.add_argument('--preprocessor_args', type=str,
-                        help='Preprocessor args')
+                        help='Preprocessor args\n'
+                             'E.g. -Iinc')
+    parser.add_argument('--delete_temporary_files', action='store_true',
+                        help='Remove temporary files (preprocessed files)')
+    parser.add_argument('--export_file', type=str,
+                        default='StaticAnalysisResult.csv',
+                        help='Export file path')
 
     args = parser.parse_args()
 
     # Example:
-    # --source
-    # args.source = r"../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
-    # "-c " + 
-    source = args.source
+    # --source="../../AtollicWorkspace/FastenHomeAut/Src/Common/Helper/MathHelper.c"
+    if not os.path.exists(args.source):
+        raise Exception('Source file does not exist: {}'.format(args.source))
+        # TODO: Support glob
 
-    if not os.path.exists(source):
-        raise Exception('Source file does not exist!')
+    if not args.preprocessor:
+        args.preprocessor = 'gcc'
+        print('Use default preprocessor: {}'.format(args.preprocessor))
 
-    #preprocessor_path = r"gcc"
-
-    # preprocessor_args = "-E"
+    # At general C compilers, the "-E" is the preprocessing. It is required for pycparser
     # now, pycparser git repository has been downloaded into this directory (pycparser dir)
-    #preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include"]
     if args.preprocessor_args:
         args.preprocessor_args = args.preprocessor_args.split(' ') + ["-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
     else:
         args.preprocessor_args = ["-E", r"-Ipycparser/utils/fake_libc_include", r"-Iutils/fake_libc_include"]
 
-    # TODO: Add them to list
-    # TODO: Read from file
-    # Added because FastenHome
-    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc/Common")
-    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc/Common/Helper")
-    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Inc")
-    #preprocessor_args.append("-I../../AtollicWorkspace/FastenHomeAut/Drivers/x86/Inc")
-    #preprocessor_args.append("-DCONFIG_PLATFORM_X86")
-    #preprocessor_args.append("-DCONFIG_USE_PANEL_PC")
-    # Could be use [] (list)
-
-    #preprocessed_file_path = r"test\test_preprocessed.c"
     preprocessed_path = args.source + '_preprocessed.c'
 
-    #pycparser_ast_generated = r"test\ast_generated.txt"
     ast_file_path = args.source + '_ast_generated.txt'
 
-    file_analysis = FileStaticAnalysis(source,
-                                       args.prepocessor, args.preprocessor_args,
+    file_analysis = FileStaticAnalysis(args.source,
+                                       args.preprocessor, args.preprocessor_args,
                                        preprocessed_path,
                                        ast_file_path)
 
-    file_analysis.run()
+    analysis_result = file_analysis.run()
+    print("Results: \n"
+          "{}".format(analysis_result))
 
+    export_result_by_source_file(analysis_result, args.source, export_filename=args.export_file)
+
+    # If remove required
+    if args.delete_temporary_files:
+        remove_temporary_file(preprocessed_path)
+        remove_temporary_file(ast_file_path)
+
+
+if __name__ == "__main__":
+    main()
