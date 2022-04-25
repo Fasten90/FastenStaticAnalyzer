@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 echo "Download pycparser"
 DIR=pycparser
 if [ -d "$DIR" ]; then

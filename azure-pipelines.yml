@@ -45,3 +45,16 @@ stages:
         export PYTHONPATH="${PYTHONPATH}:${CWD}/pycparser"
         ./test_exec.sh
 
+
+  - job: DockerJob_Ubuntu
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: 'Docker'
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        repository: docker-python-fasten-static-anylzer-ubuntu
+        command: build
+        Dockerfile: Dockerfile
+
