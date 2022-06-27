@@ -183,7 +183,7 @@ class FileStaticAnalysis():
         checker_obj = FuncCallVisitor()
         checker_obj.visit(self.__parse_result)
         # Listing
-        func_calls_str = "".join(item + "\n" for item in func_calls)
+        func_calls_str = "".join(str(item) + "\n" for item in func_calls)
 
         print("Func calls: (Called functions)")
         print(func_calls_str)
