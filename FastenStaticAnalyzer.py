@@ -101,6 +101,7 @@ class FileStaticAnalysis():
 
         self.__analysis_result = []
 
+
     def run(self):
 
         if not os.path.exists(self.__input_file_path):
@@ -167,6 +168,7 @@ class FileStaticAnalysis():
 
         return result_all
 
+
     def call_checker(self, checker):
         # Call the checker
         checker_result = checker["checker"]()
@@ -175,6 +177,7 @@ class FileStaticAnalysis():
             for item in checker_result:
                 res.append({'checker': checker["name"], 'error': item})
         return res
+
 
     def FuncCall(self):
         checker_obj = FuncCallVisitor()
@@ -339,10 +342,11 @@ class ReturnVisitor(c_ast.NodeVisitor):
         return_used.add(node.coord)
 
 
-def export_result_by_source_file(result_list, source_file, export_filename='static_analysis_result.csv'):
+def export_result_by_source_file(result_list, source_file, export_filename='static_analysis_result.csv', extend=False):
     if result_list:
         # Create CSV
-        with open(export_filename, mode='w', newline='', encoding='utf-8') as csv_file:
+        mode = 'a' if extend else 'w'
+        with open(export_filename, mode=mode, newline='', encoding='utf-8') as csv_file:
             # TODO: Extend with more field
             fieldnames = ['file_path', 'line', 'checker', 'error']
             # TODO: Workaround
@@ -376,6 +380,9 @@ def main():
     parser.add_argument('--export_file', type=str,
                         default='StaticAnalysisResult.csv',
                         help='Export file path')
+    parser.add_argument('--extend_export_file', action='store_true',
+                        default=False,
+                        help='Extend export file. It is useful for more source files')
 
     args = parser.parse_args()
 
@@ -409,7 +416,7 @@ def main():
     print("Results: \n"
           "{}".format(analysis_result))
 
-    export_result_by_source_file(analysis_result, args.source, export_filename=args.export_file)
+    export_result_by_source_file(analysis_result, args.source, export_filename=args.export_file, extend=args.extend_export_file)
 
     # If remove required
     if args.delete_temporary_files:
