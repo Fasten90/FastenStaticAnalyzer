@@ -14,8 +14,5 @@ fi
 
 echo "Install requirements"
 
-python3_output=$(python3 -m pip install -r requirements.txt)
-python3_result=$?
-if [ $python3_result -ne 0 ]; then
-    pip install -r requirements.txt
-fi
+python3 -m pip install -r requirements.txt --break-system-packages
+
