@@ -13,4 +13,4 @@ fi
 #python -m venv venv
 
 echo "Install requirements"
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
